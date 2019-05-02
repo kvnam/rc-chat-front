@@ -7,12 +7,15 @@ import { InputAdornment, createStyles, withStyles, Theme, WithStyles } from '@ma
 const styles = (theme: Theme) => createStyles({
   root: {
     width: "100%",
-    backgroundColor: "#f6f6f6"
+    backgroundColor: "#f6f6f6",
+    marginTop: '5rem'
   }
 })
 
 export interface Props extends WithStyles<typeof styles> {
   username: string
+  room: string
+  onSubmit: Function
 }
 
 const PickUsername:React.FunctionComponent<Props> = props => {
