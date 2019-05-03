@@ -10,6 +10,9 @@ const styles = (theme: Theme) => createStyles({
   },
   grow: {
     flexGrow: 1,
+  },
+  rcAppBar: {
+    color: "#000"
   }
 });
 
@@ -23,7 +26,7 @@ class Header extends React.Component<Props, State> {
 
   render(){
     return (
-      <AppBar position="static">
+      <AppBar className="rc-appbar" position="static">
         <Toolbar>
           <Typography className="app-brand" variant="h6" color="inherit">Haiku Me!</Typography>
         </Toolbar>
