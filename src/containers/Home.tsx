@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { createStyles, withStyles, Theme, WithStyles } from '@material-ui/core';
 import PickUserName from '../components/Room/Forms/PickUsername';
@@ -8,36 +8,61 @@ const styles = (theme: Theme) => createStyles({
     width: "100%"
   }
 });
-export interface Props extends WithStyles<typeof styles>{
+export interface Props extends WithStyles<typeof styles>{ }
 
-}
+/**
+ *  Home container
+ * 
+ * @param props 
+ */
+function Home(props: Props){
 
-interface State {
-  username: string,
-  room: string
-}
+  const [ fields, setFields ] = React.useState({
+    username: '',
+    usernameError: false,
+    room: 'Default',
+    roomError: false
+  })
 
-class Home extends React.Component<Props, State>{
+  /**
+   *  Handle input change of all form elements 
+   * 
+   * @param event FormEvent
+   * @param type Form element name
+   */
+  const onInputChange = (event: React.FormEvent<EventTarget>, type: string) => {
+    
+    let eventTarget = event.target as HTMLInputElement;
+    console.log(`Field picked ${type} ${eventTarget.value}`);
+    setFields({...fields, [type]: eventTarget.value});
 
-  state: State = {
-    username: "",
-    room: "Default"
   }
 
-  onUsernamePick = (username: string, room: string) => {
-    console.log(`Username picked ${username} ${room}`);
+  /**
+   *  Submit form content to API
+   * 
+   * @param event MouseEvent
+   */
+  const onFormSubmit = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    console.log('On form submitted');
+    
   }
 
-  render(){
-    const { classes } = this.props;
+  const { classes } = props;
     return (
       <Grid className={classes.root} container alignItems="center" justify="center">
         <Grid item xs={12} md={6}>
-          <PickUserName room={this.state.room} username={this.state.username} onSubmit={this.onUsernamePick} />
+          <PickUserName 
+            room={fields.room} 
+            roomError={fields.roomError}
+            username={fields.username} 
+            usernameError={fields.usernameError}
+            onInputChange={onInputChange} 
+            onSubmit={onFormSubmit} />
         </Grid>  
       </Grid>
     )
   }
-}
 
 export default withStyles(styles)(Home);
