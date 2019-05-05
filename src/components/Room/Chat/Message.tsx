@@ -1,7 +1,7 @@
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
-import { createStyles, withStyles, Theme, WithStyles } from '@material-ui/core';
+import { createStyles, withStyles, Theme, WithStyles, ListItem, ListItemText } from '@material-ui/core';
 
 const styles = (theme: Theme) => createStyles({
   root: {
@@ -16,18 +16,20 @@ const styles = (theme: Theme) => createStyles({
 })
 
 export interface Props extends WithStyles<typeof styles> {
-  users: Number
+  message: string,
+  username: string
 }
 
-const ChatRoom:React.FunctionComponent<Props> = props => {
+const Message:React.FunctionComponent<Props> = props => {
   const { classes } = props;
   return (
-    <Grid container className={`pick-username__form ${classes.root}`}>
-      <Grid item className={classes.msgWindow}>
-        <Typography variant="h6">Welcomg to the XYZ room</Typography>
-      </Grid>
-    </Grid>
+    <ListItem alignItems="flex-start" className={classes.msgWindow}>
+        <ListItemText
+          primary={props.username}
+          secondary={props.message}
+        />
+    </ListItem>
   )
 }
 
-export default withStyles(styles)(ChatRoom);
+export default withStyles(styles)(Message);
