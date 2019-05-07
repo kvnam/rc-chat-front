@@ -2,6 +2,7 @@ import WebSocket from 'isomorphic-ws';
 
 const WS_URL = process.env.WEBSOCKET_URL || "";
 
+let WSService = null;
 class WebSocketService {
   
   constructor(){
@@ -71,6 +72,15 @@ class WebSocketService {
 
   }
 
+  static initWSService(){
+    if(!WSService){
+      WSService = new WebSocketService();
+      WSService.initSocket();
+      return WSService;
+    }
+    return WSService;
+  }
+
 }
 
-export default WebSocketService;
+export const getWSService = WebSocketService.initWSService;

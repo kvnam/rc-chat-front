@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Grid from '@material-ui/core/Grid';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { createStyles, withStyles, Theme, WithStyles } from '@material-ui/core';
 import PickUserName from '../components/Room/Forms/PickUsername';
+import ChatRoom from './ChatRoom';
 import { getUserService } from '../services/Users';
 
 const styles = (theme: Theme) => createStyles({
@@ -9,7 +11,7 @@ const styles = (theme: Theme) => createStyles({
     width: "100%"
   }
 });
-export interface Props extends WithStyles<typeof styles> { }
+export interface Props extends WithStyles<typeof styles>, RouteComponentProps { }
 
 /**
  *  Home container
@@ -23,6 +25,7 @@ function Home(props: Props) {
     usernameError: false,
     usernameHelperText: 'Only characters and numbers allowed and length should be between 6 - 8.',
     room: 'Default',
+    userAdded: false,
     userService: getUserService()
   });
 
@@ -54,10 +57,18 @@ function Home(props: Props) {
    */
   const onFormSubmit = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    
+    //Basic validation
+    if(fields.username.length && !fields.usernameError && fields.room){
+      setFields({...fields, userAdded: true});
+    }
   }
 
   const { classes } = props;
+
+  if(fields.userAdded){
+    return <ChatRoom user={{username: fields.username, room: fields.room}} />;
+  }
+
   return (
     <Grid className={classes.root} container alignItems="center" justify="center">
       <Grid item xs={12} md={6}>
@@ -73,4 +84,4 @@ function Home(props: Props) {
   )
 }
 
-export default withStyles(styles)(Home);
+export default withStyles(styles)(withRouter(Home));

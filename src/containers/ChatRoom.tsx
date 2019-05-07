@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import { createStyles, Theme, WithStyles, withStyles, Typography } from '@material-ui/core';
 import Message from '../components/Room/Chat/Message';
+import { getUserService } from '../services/Users';
+
+import './chatroom.scss';
+interface User {
+  username: string,
+  room: string
+};
 
 const styles = (theme: Theme) => createStyles({
   root: {
@@ -27,27 +34,42 @@ const styles = (theme: Theme) => createStyles({
 });
 
 export interface Props extends WithStyles<typeof styles>, RouteComponentProps {
-  roomName: string
+  user: User   
  }
 
 function ChatRoom(props: Props){
 
+  const [users, setUsers] = useState<User[]>(getUserService().getUserList(props.user.room));
   const [ fields, setFields ] = useState({
-    users: [],
-    userCount: 0,
     messageList: [{
       text: '',
       username: ''
-    }]
+    }],
+    userService: getUserService(),
+    userAdded: getUserService().addUser({username: props.user.username, room: props.user.room}),
   });
 
+  useEffect(() => {
+    if(fields.userAdded && users && !users.find(usrVal => usrVal.username === props.user.username)){
+      const userList = [...users];
+      userList.push(props.user);
+      setUsers(userList);
+    }
+  }, [fields.userAdded]);
+
+  if(fields.userAdded){
+    return (
+      <Grid container alignItems="flex-start" justify="flex-start">
+       <Grid item xs={12} md={12}>
+        <Typography variant="body1">Welcome to {props.user.room}!</Typography>
+        {fields.messageList.map(msg => <Message message={msg.text} username={msg.username} />)}
+       </Grid>
+      </Grid>
+    )
+  }
+
   return (
-    <Grid container alignItems="flex-start" justify="flex-start">
-     <Grid item xs={12} md={12}>
-      <Typography variant="body1">Welcome to {props.roomName}!</Typography>
-      {fields.messageList.map(msg => <Message message={msg.text} username={msg.username} />)}
-     </Grid>
-    </Grid>
+    <div className="loading">Adding you to the room, please wait..</div>
   )
 
 }

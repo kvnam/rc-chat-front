@@ -1,4 +1,4 @@
-
+import { getWSService } from './WebSocket';
 interface UserType {
   username: string
   room: string
@@ -6,7 +6,7 @@ interface UserType {
   lastActive? : Date
 }
 
-let UserService = null;
+let UserService: Users | null = null;
 
 /**
  *  User class to maintain user state
@@ -18,29 +18,34 @@ let UserService = null;
 class Users {
 
   private userList : [UserType]
-
+  private socketConnection : WebSocket | null
   constructor(){
     this.userList = [{
       username: '',
       room: ''
     }];
+    this.socketConnection = null;
   }
   /**
-   *  Add a new user to the room
+   *  Add a new user to the room and initiate WebSocket connection
    *  @param user User object
    *  @returns Status string
    */
-  addUser = (user: UserType): string => {
-    if(!this.checkUsername(user.username)){
+  addUser = (user: UserType): boolean => {
+    if(this.checkUsername(user.username)){
       this.userList.push({
         username: user.username,
         room: user.room,
         joined: new Date(),
         lastActive: new Date() 
        });
-       return "Success!";
+       
+       //Initiate the WebSocket connection for the user
+       this.socketConnection = getWSService();
+
+       return true;
     }else{
-      return "Pick another username!";
+      return false;
     }
     
   }
@@ -76,8 +81,45 @@ class Users {
     return true;
   }
 
+  /**
+   *  Get total user count
+   *  @param room Specific room to get count for
+   */
+  getUserCount = (room: string): number => {
+    let totalCount = 0;
+    if(room){
+      this.userList.forEach(user => {
+        if(user.room === room){
+          totalCount += 1;
+        }
+      });
+      return totalCount;
+    }
+    return this.userList.length;
+  }
+
+  /**
+   *  Get Users for a room
+   *  @param room
+   */
+  getUserList = (room: string): UserType[] => {
+    let finalList = [];
+    if(room){
+      finalList = this.userList.filter(user => {
+        if(user.room === room){
+          return user;
+        }
+      });      
+      return finalList;
+    }
+    return this.userList;
+  }
+
   static initUserService = (): Users => {
-    UserService = new Users();
+    if(!UserService){
+      UserService = new Users();
+      return UserService;
+    }    
     return UserService;
   }
 }
