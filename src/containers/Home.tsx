@@ -65,13 +65,11 @@ function Home(props: Props) {
 
   const { classes } = props;
 
-  if(fields.userAdded){
-    return <ChatRoom user={{username: fields.username, room: fields.room}} />;
-  }
-
   return (
     <Grid className={classes.root} container alignItems="center" justify="center">
       <Grid item xs={12} md={6}>
+       {fields.userAdded ? 
+        <ChatRoom user={{username: fields.username, room: fields.room}} /> : 
         <PickUserName
           room={fields.room}
           usernameHelperText={fields.usernameHelperText}
@@ -79,6 +77,7 @@ function Home(props: Props) {
           usernameError={fields.usernameError}
           onInputChange={onInputChange}
           onSubmit={onFormSubmit} />
+        }
       </Grid>
     </Grid>
   )

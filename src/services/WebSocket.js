@@ -1,6 +1,6 @@
 import WebSocket from 'isomorphic-ws';
 
-const WS_URL = process.env.WEBSOCKET_URL || "";
+const WS_URL = process.env.REACT_APP_WEBSOCKET_URL || "";
 
 let WSService = null;
 class WebSocketService {
@@ -16,9 +16,9 @@ class WebSocketService {
    */
   initSocket = () => {
     this.websocket = new WebSocket(WS_URL);
-    this.websocket.open = this.onConnOpen;
-    this.websocket.onmessage = this.onMessage;
-    this.websocket.onclose = this.onConnClose;
+    this.websocket.open = this.onConnOpen();
+    this.websocket.onmessage = this.onMessage();
+    this.websocket.onclose = this.onConnClose();
   }
 
   /**

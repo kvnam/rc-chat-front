@@ -26,7 +26,7 @@ const styles = (theme: Theme) =>
     },
     input: {
       width: '100%',
-      margin: '2rem 1rem'
+      marginBottom: '2rem',
     },
     headerText: {
       textAlign: 'center',
@@ -63,7 +63,7 @@ const PickUsername: React.FunctionComponent<Props> = props => {
         </Typography>
       </Grid>
       <Grid item xs={12} md={12}>
-        <form className={`rc-form ${classes.form}`} onSubmit={() => props.onSubmit()}>
+        <form className={`rc-form col-xs-12 ${classes.form}`} onSubmit={(event) => props.onSubmit(event)}>
           <TextField
             value={props.username}
             className={`username-text ${classes.input}`}
@@ -93,7 +93,7 @@ const PickUsername: React.FunctionComponent<Props> = props => {
                 <MenuItem value="Haiku">Haiku Me!</MenuItem>
               </Select>
           </FormControl>          
-          <Button variant="contained" color="primary">Submit</Button>
+          <Button type="submit" variant="contained" color="primary">Submit</Button>
         </form>
       </Grid>
     </Grid>

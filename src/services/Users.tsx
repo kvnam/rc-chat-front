@@ -32,6 +32,7 @@ class Users {
    *  @returns Status string
    */
   addUser = (user: UserType): boolean => {
+    console.log('In add user ', user.username);
     if(this.checkUsername(user.username)){
       this.userList.push({
         username: user.username,
@@ -76,7 +77,7 @@ class Users {
       return username === userObj.username;
     });
     console.log(`User name index returned ${userIndex}`);
-    if(userIndex) return false;
+    if(userIndex >= 0) return false;
 
     return true;
   }

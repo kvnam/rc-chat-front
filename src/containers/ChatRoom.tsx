@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import { createStyles, Theme, WithStyles, withStyles, Typography } from '@material-ui/core';
 import Message from '../components/Room/Chat/Message';
@@ -23,6 +22,9 @@ const styles = (theme: Theme) => createStyles({
     backgroundColor: '#f2f1ef',
     color: '#2e3131'
   },
+  greeting: {
+    marginTop: '2rem',
+  },
   userName: {
     color: '#3498db',
     fontSize: '1.2rem',
@@ -33,12 +35,12 @@ const styles = (theme: Theme) => createStyles({
   }
 });
 
-export interface Props extends WithStyles<typeof styles>, RouteComponentProps {
+export interface Props extends WithStyles<typeof styles> {
   user: User   
  }
 
 function ChatRoom(props: Props){
-
+  const { classes } = props;
   const [users, setUsers] = useState<User[]>(getUserService().getUserList(props.user.room));
   const [ fields, setFields ] = useState({
     messageList: [{
@@ -61,8 +63,8 @@ function ChatRoom(props: Props){
     return (
       <Grid container alignItems="flex-start" justify="flex-start">
        <Grid item xs={12} md={12}>
-        <Typography variant="body1">Welcome to {props.user.room}!</Typography>
-        {fields.messageList.map(msg => <Message message={msg.text} username={msg.username} />)}
+        <Typography className={classes.greeting} variant="body1">Welcome to {props.user.room}!</Typography>
+        {fields.messageList.map((msg, index) => <Message key={index} message={msg.text} username={msg.username} />)}
        </Grid>
       </Grid>
     )
@@ -74,4 +76,4 @@ function ChatRoom(props: Props){
 
 }
 
-export default withStyles(styles)(withRouter(ChatRoom));
+export default withStyles(styles)(ChatRoom);
