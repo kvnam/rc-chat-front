@@ -3,6 +3,11 @@ import WebSocket from 'isomorphic-ws';
 const WS_URL = process.env.REACT_APP_WEBSOCKET_URL || "";
 
 let WSService = null;
+
+const MESSAGE_TYPE = {
+  ALL: 'all',
+  PM: 'pm'
+};
 class WebSocketService {
   
   constructor(){
@@ -36,13 +41,24 @@ class WebSocketService {
   }
 
   /**
-   *  Used my application to send message to the WebSocket API Gateway
+   *  Used by application to send message to the WebSocket API Gateway
+   *  @param routeKey The route key for WebSocket API Gateway
    *  @param message String message
+   *  message {
+   *    room,
+   *    type,
+   *    msg,
+   *    username,
+   *    for
+   *  }
    */
-  sendMessage = (message) => {
+  sendMessage = (routeKey, message) => {
+    console.log(`Sending message to route ${routeKey}`);
+    console.log(message);
+
     this.websocket.send({
-      rcaction: "test",
-      rcmsg: message
+      rcaction: routeKey,
+      rcmsg: JSON.stringify(message)
     });
   }
 
@@ -69,7 +85,13 @@ class WebSocketService {
   onMessage = (data) => {
     console.log('Response from API ');
     console.log(data);
-
+    const message = JSON.parse(data);
+    const typeListener = this.messageListeners.find(listener => listener.type === message.type);
+    if(typeListener && typeof typeListener.listener === "function"){
+      typeListener.listener(message);
+    }else{
+      console.log('No handler found for message type');
+    }
   }
 
   static initWSService(){
