@@ -14,6 +14,13 @@ interface User {
   room: string
 };
 
+interface Message {
+  type: string,
+  msg: string,
+  username: string
+  sent: Date
+}
+
 const styles = (theme: Theme) => createStyles({
   root: {
     width: '100%'
@@ -68,27 +75,29 @@ export interface Props extends WithStyles<typeof styles> {
 function ChatRoom(props: Props){
   const { classes } = props;
   const [users, setUsers] = useState<User[]>(getUserService().getUserList(props.user.room));
+  const [ messageList, updateMessageList ] = useState<Message[]>([]);
   const [ fields, setFields ] = useState({
-    messageList: [{
-      text: '',
-      username: ''
-    }],
-    messageFromWS: getWSService().chatMsgHandler(),
     userService: getUserService(),
     userAdded: getUserService().addUser({username: props.user.username, room: props.user.room}),
   });
+
+  const chatMessageHandler = (message : Message) => {
+    if(message.type === "all"){
+      let updatedList = [...messageList];
+      updatedList.push(message);
+      updateMessageList(updatedList);
+    }
+  };
 
   useEffect(() => {
     if(fields.userAdded && users && !users.find(usrVal => usrVal.username === props.user.username)){
       const userList = [...users];
       userList.push(props.user);
       setUsers(userList);
+      getWSService().addMessageListener(props.user.room, "all", chatMessageHandler);
     }
   }, [fields.userAdded]);
 
-  useEffect(() => {
-
-  }, [fields.messageFromWS])
 
  // if(fields.userAdded){
     return (
@@ -96,7 +105,7 @@ function ChatRoom(props: Props){
        <Grid item xs={12} md={8}>
         <div className={classes.chatWindow}>
         <Typography className={classes.greeting} variant="h5">Welcome to room {props.user.room}!</Typography>
-        {fields.messageList.map((msg, index) => <Message key={index} message={msg.text} username={msg.username} />)}
+        {messageList.map((message, index) => <Message key={index} message={message.msg} username={message.username} />)}
         </div>
        </Grid>
        <Grid item xs={12} md={4}>

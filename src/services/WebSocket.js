@@ -64,15 +64,17 @@ class WebSocketService {
 
   /**
    *  Used by application to register different listeners for 
-   *  different message types
+   *  different message types [To be used later]
+   *  @param room Room name
    *  @param type Message type ['all', 'pm']
    *  @param listener Function to handle message type
    */
-  addMessageListener = (type, listener) => {
-    if(!type || typeof listener !== 'function'){
+  addMessageListener = (room, type, listener) => {
+    if(!type || !room || typeof listener !== 'function'){
       return;
     }
     this.messageListeners.push({
+      room,
       type,
       listener
     });
@@ -80,14 +82,16 @@ class WebSocketService {
 
   /**
    * Handler that receives the actual messages from the WebSocket API
+   * For now it simply returns the parsed message body
    * @param data Message body received from WebSocket 
    */
   onMessage = (data) => {
     console.log('Response from API ');
     console.log(data);
     const message = JSON.parse(data);
-    const typeListener = this.messageListeners.find(listener => listener.type === message.type);
+    const typeListener = this.messageListeners.find(listener => (listener.type === message.type) && (message.room === listener.room) );
     if(typeListener && typeof typeListener.listener === "function"){
+      console.log(`Calling listener for message `);
       typeListener.listener(message);
     }else{
       console.log('No handler found for message type');
