@@ -3,7 +3,7 @@ interface UserType {
   username: string
   room: string
   joined? : Date
-  lastActive? : Date
+  last_active? : Date
 }
 
 let UserService: Users | null = null;
@@ -38,13 +38,14 @@ class Users {
         username: user.username,
         room: user.room,
         joined: new Date(),
-        lastActive: new Date() 
+        last_active: new Date() 
       };
       this.userList.push(userVal);
        
        //Initiate the WebSocket connection for the user
        this.socketConnection = getWSService().initWSService();
        if(this.socketConnection){
+         //Add user details to Mongo DB
          getWSService().sendMessage("useradd", userVal);
        }
        return true;
