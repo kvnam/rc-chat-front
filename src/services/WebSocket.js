@@ -70,6 +70,7 @@ class WebSocketService {
    *  @param listener Function to handle message type
    */
   addMessageListener = (room, type, listener) => {
+    console.log(`Adding listener for ${room} for ${type} msgs`);
     if(!type || !room || typeof listener !== 'function'){
       return;
     }

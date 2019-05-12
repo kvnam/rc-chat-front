@@ -34,16 +34,19 @@ class Users {
   addUser = (user: UserType): boolean => {
     console.log('In add user ', user.username);
     if(this.checkUsername(user.username)){
-      this.userList.push({
+      const userVal = {
         username: user.username,
         room: user.room,
         joined: new Date(),
         lastActive: new Date() 
-       });
+      };
+      this.userList.push(userVal);
        
        //Initiate the WebSocket connection for the user
-       this.socketConnection = getWSService();
-
+       this.socketConnection = getWSService().initWSService();
+       if(this.socketConnection){
+         getWSService().sendMessage("useradd", userVal);
+       }
        return true;
     }else{
       return false;

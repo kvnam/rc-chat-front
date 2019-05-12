@@ -3,6 +3,13 @@ import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import { createStyles, withStyles, Theme, WithStyles, ListItem, ListItemText } from '@material-ui/core';
 
+interface Message {
+  type: string;
+  msg: string;
+  username: string;
+  sent: Date;
+}
+
 const styles = (theme: Theme) => createStyles({
   root: {
     width: "100%",
@@ -16,17 +23,16 @@ const styles = (theme: Theme) => createStyles({
 })
 
 export interface Props extends WithStyles<typeof styles> {
-  message: string,
-  username: string
+  message: Message
 }
 
 const Message:React.FunctionComponent<Props> = props => {
-  const { classes } = props;
+  const { classes, message } = props;
   return (
     <ListItem alignItems="flex-start" className={classes.msgWindow}>
         <ListItemText
-          primary={props.username}
-          secondary={props.message}
+          primary={message.username}
+          secondary={message.msg}
         />
     </ListItem>
   )
