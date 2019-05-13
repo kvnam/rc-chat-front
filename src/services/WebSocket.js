@@ -26,7 +26,7 @@ class WebSocketService {
   initSocket = () => {
     console.log(`WebSocket service initSocket called`);
     this.websocket = new WebSocket(WS_URL);
-    this.websocket.open = this.onConnOpen;
+    this.websocket.onopen = this.onConnOpen;
     this.websocket.onmessage = this.onMessage;
     this.websocket.onclose = this.onConnClose;
   }
@@ -36,15 +36,7 @@ class WebSocketService {
    */
   onConnOpen = () => {
     this.isOpen = true;
-    console.log('Websocket connected!');
-    if(this.timeOut){
-      clearTimeout(this.timeOut);
-    }
-    if(!this.userSent){
-      console.log('Sending user add message now');
-      this.sendMessage(this.userMsg.routeKey, this.userMsg.message);
-      this.userSent = true;
-    }
+    console.log('Websocket connected!');   
   }
 
   /**
@@ -75,12 +67,7 @@ class WebSocketService {
         rcaction: routeKey,
         rcmsg: JSON.stringify(message)
       }));
-    }else{
-      console.log('Storing user msg for on open');
-      this.userMsg = {
-        routeKey,
-        message
-      };
+    }else{      
       console.log(`Websocket connection not found!!`);
     }    
   }
@@ -113,8 +100,8 @@ class WebSocketService {
     console.log('Response from API ');
     console.log(data);
     if (data) {
-      const message = JSON.parse(data);
-      const typeListener = this.messageListeners.find(listener => (listener.type === message.type) && (message.room === listener.room));
+      const message = JSON.parse(data.data);
+      const typeListener = this.messageListeners.find(listener => listener.type === message.type);
       if (typeListener && typeof typeListener.listener === "function") {
         console.log(`Calling listener for message `);
         typeListener.listener(message);

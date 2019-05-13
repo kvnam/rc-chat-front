@@ -115,7 +115,9 @@ function ChatRoom(props: Props) {
   });
 
   const chatMessageHandler = (message: Message) => {
+    console.log('Add msg to list');
     if (message.type === "all") {
+      console.log(message);
       let updatedList = [...messageList];
       updatedList.push(message);
       updateMessageList(updatedList);
@@ -139,7 +141,7 @@ function ChatRoom(props: Props) {
       room: props.user.room
     };
     setCurrentMessage(updatedMsg);
-    getWSService().sendMessage("test", currentMessage);
+    getWSService().sendMessage("test", updatedMsg);
   }
 
   useEffect(() => {

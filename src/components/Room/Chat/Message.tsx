@@ -37,7 +37,7 @@ const Message:React.FunctionComponent<Props> = props => {
   return (
     <ListItem alignItems="flex-start" className={classes.msgWindow}>
         <ListItemText
-          primary={message.user.username}
+          primary={message.user ? message.user.username : "Notice:"}
           secondary={message.msg}
         />
     </ListItem>

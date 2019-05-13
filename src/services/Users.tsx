@@ -44,10 +44,15 @@ class Users {
        
        //Initiate the WebSocket connection for the user
        this.socketConnection = getWSService();
-       if(this.socketConnection){
-         //Add user details to Mongo DB
-         getWSService().sendMessage("useradd", userVal);
-       }
+       const timeout = setTimeout(() => {
+         console.log('In timeout callback');
+         console.log(this.socketConnection);
+         if(this.socketConnection){
+          console.log('Sending message');
+          //Add user details to Mongo DB
+          getWSService().sendMessage("useradd", userVal);
+        }
+       }, 3000);       
        return true;
     }else{
       return false;
