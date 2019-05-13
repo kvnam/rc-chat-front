@@ -9,10 +9,14 @@ const MESSAGE_TYPE = {
   PM: 'pm'
 };
 class WebSocketService {
-  
-  constructor(){
+
+  constructor() {
+    console.log(`WebSocket service contructor called`);
     this.websocket = null;
     this.messageListeners = [];
+    this.isOpen = false;
+    this.userSent = false;
+    this.userMsg = null;
   }
 
   /**
@@ -20,17 +24,27 @@ class WebSocketService {
    *  basic listeners to handle events
    */
   initSocket = () => {
+    console.log(`WebSocket service initSocket called`);
     this.websocket = new WebSocket(WS_URL);
-    this.websocket.open = this.onConnOpen();
-    this.websocket.onmessage = this.onMessage();
-    this.websocket.onclose = this.onConnClose();
+    this.websocket.open = this.onConnOpen;
+    this.websocket.onmessage = this.onMessage;
+    this.websocket.onclose = this.onConnClose;
   }
 
   /**
    *  Show connection status to user
    */
   onConnOpen = () => {
+    this.isOpen = true;
     console.log('Websocket connected!');
+    if(this.timeOut){
+      clearTimeout(this.timeOut);
+    }
+    if(!this.userSent){
+      console.log('Sending user add message now');
+      this.sendMessage(this.userMsg.routeKey, this.userMsg.message);
+      this.userSent = true;
+    }
   }
 
   /**
@@ -55,11 +69,20 @@ class WebSocketService {
   sendMessage = (routeKey, message) => {
     console.log(`Sending message to route ${routeKey}`);
     console.log(message);
-
-    this.websocket.send({
-      rcaction: routeKey,
-      rcmsg: JSON.stringify(message)
-    });
+    console.log(this.websocket);
+    if(this.websocket && this.isOpen){
+      this.websocket.send(JSON.stringify({
+        rcaction: routeKey,
+        rcmsg: JSON.stringify(message)
+      }));
+    }else{
+      console.log('Storing user msg for on open');
+      this.userMsg = {
+        routeKey,
+        message
+      };
+      console.log(`Websocket connection not found!!`);
+    }    
   }
 
   /**
@@ -71,7 +94,7 @@ class WebSocketService {
    */
   addMessageListener = (room, type, listener) => {
     console.log(`Adding listener for ${room} for ${type} msgs`);
-    if(!type || !room || typeof listener !== 'function'){
+    if (!type || !room || typeof listener !== 'function') {
       return;
     }
     this.messageListeners.push({
@@ -89,22 +112,27 @@ class WebSocketService {
   onMessage = (data) => {
     console.log('Response from API ');
     console.log(data);
-    const message = JSON.parse(data);
-    const typeListener = this.messageListeners.find(listener => (listener.type === message.type) && (message.room === listener.room) );
-    if(typeListener && typeof typeListener.listener === "function"){
-      console.log(`Calling listener for message `);
-      typeListener.listener(message);
-    }else{
-      console.log('No handler found for message type');
+    if (data) {
+      const message = JSON.parse(data);
+      const typeListener = this.messageListeners.find(listener => (listener.type === message.type) && (message.room === listener.room));
+      if (typeListener && typeof typeListener.listener === "function") {
+        console.log(`Calling listener for message `);
+        typeListener.listener(message);
+      } else {
+        console.log('No handler found for message type');
+      }
     }
   }
 
-  static initWSService(){
-    if(!WSService){
+  static initWSService() {
+    console.log(`WebSocket service initWSService called`);
+    if (!WSService) {
+      console.log(`WSService is null make a new one`);
       WSService = new WebSocketService();
       WSService.initSocket();
       return WSService;
     }
+    console.log('WSService already exists return it');
     return WSService;
   }
 

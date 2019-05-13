@@ -43,7 +43,7 @@ class Users {
       this.userList.push(userVal);
        
        //Initiate the WebSocket connection for the user
-       this.socketConnection = getWSService().initWSService();
+       this.socketConnection = getWSService();
        if(this.socketConnection){
          //Add user details to Mongo DB
          getWSService().sendMessage("useradd", userVal);

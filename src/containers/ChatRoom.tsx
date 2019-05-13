@@ -5,7 +5,8 @@ import {
   Theme,
   WithStyles,
   withStyles,
-  Typography
+  Typography,
+  Button
 } from "@material-ui/core";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
@@ -25,7 +26,7 @@ interface Message {
   type: string;
   msg: string;
   sent: Date | string;
-  user: User | {};
+  user: User;
 }
 
 const styles = (theme: Theme) =>
@@ -39,7 +40,8 @@ const styles = (theme: Theme) =>
       padding: "1.5rem",
       border: "1px solid #dadfe1",
       backgroundColor: "#f2f1ef",
-      color: "#2e3131"
+      color: "#2e3131",
+      minHeight: '100vh'
     },
     chatWindow: {
       width: "100%",
@@ -80,6 +82,10 @@ const styles = (theme: Theme) =>
       border: "1px solid #dadfe1",
       fontSize: "1rem",
       padding: ".7rem"
+    },
+    sendBtn: {
+      height: '94px',
+      marginTop: '.6rem'      
     }
   });
 
@@ -95,11 +101,7 @@ function ChatRoom(props: Props) {
   const [messageList, updateMessageList] = useState<Message[]>([]);
   const [fields, setFields] = useState({
     userService: getUserService(),
-    userAdded: getUserService().addUser({
-      username: props.user.username,
-      room: props.user.room
-    }),
-    wsService: getWSService()
+    userAdded: false
   });
 
   const [currentMessage, setCurrentMessage] = useState<Message>({
@@ -122,14 +124,14 @@ function ChatRoom(props: Props) {
 
   const onInputChange = (event: React.FormEvent<EventTarget>) => {
     let eventTarget = event.target as HTMLInputElement;
-    let updatedMsg = {...currentMessage};
-    updatedMsg.msg = eventTarget.value;    
+    let updatedMsg = { ...currentMessage };
+    updatedMsg.msg = eventTarget.value;
     setCurrentMessage(updatedMsg);
   }
 
   const onSendMessage = () => {
     console.log('Send message clicked ');
-    let updatedMsg = {...currentMessage};
+    let updatedMsg = { ...currentMessage };
     updatedMsg.type = "all";
     updatedMsg.sent = new Date();
     updatedMsg.user = {
@@ -137,8 +139,21 @@ function ChatRoom(props: Props) {
       room: props.user.room
     };
     setCurrentMessage(updatedMsg);
-    fields.wsService.sendMessage("test", currentMessage);
+    getWSService().sendMessage("test", currentMessage);
   }
+
+  useEffect(() => {
+    console.log(`In userService useEffect`);
+    if(!fields.userAdded && !users.find(usrVal => usrVal.username === props.user.username)){
+      console.log(`Adding user to service `);
+      const userAdd = fields.userService.addUser({
+        username: props.user.username,
+        room: props.user.room
+      });
+      console.log(`User added ${userAdd}`);
+      setFields({...fields, userAdded: userAdd});
+    }
+  }, [fields.userService]);
 
   useEffect(() => {
     if (
@@ -150,7 +165,7 @@ function ChatRoom(props: Props) {
       userList.push(props.user);
       setUsers(userList);
       //Add message listener for this chat room
-      fields.wsService.addMessageListener(
+      getWSService().addMessageListener(
         props.user.room,
         "all",
         chatMessageHandler
@@ -160,7 +175,7 @@ function ChatRoom(props: Props) {
     }
   }, [fields.userAdded]);
 
-  // if(fields.userAdded){
+  if(fields.userAdded){
   return (
     <Grid
       container
@@ -175,7 +190,7 @@ function ChatRoom(props: Props) {
           justify="flex-start"
           direction="column"
         >
-          <Grid item xs={12} md={12}>
+          <Grid item xs={12} md={12} className={classes.root}>
             <div className={classes.chatWindow}>
               <Typography className={classes.greeting} variant="h5">
                 Welcome to room {props.user.room}!
@@ -185,19 +200,29 @@ function ChatRoom(props: Props) {
               ))}
             </div>
           </Grid>
-          <Grid item xs={12} md={12}>
-            <div className={classes.sendChatBox}>
-              <TextField
-                id="standard-multiline-flexible"
-                label="Multiline"
-                multiline
-                rowsMax="4"
-                value={this.state.multiline}
-                onChange={this.handleChange("multiline")}
-                className={classes.textField}
-                margin="normal"
-              />
-            </div>
+          <Grid item xs={12} md={12} className={classes.root}>
+            <Grid container direction="row" alignItems="flex-start">
+              <Grid item xs={9} md={11}>
+                <div className={classes.sendChatBox}>
+                  <TextField
+                    id="standard-multiline-flexible"
+                    label="Enter your message here"
+                    multiline
+                    rowsMax="4"
+                    fullWidth
+                    value={currentMessage.msg}
+                    onChange={(event) => onInputChange(event)}
+                    className="msg-box"
+                    margin="normal"
+                  />
+                </div>
+              </Grid>
+              <Grid item xs={3} md={1}>
+                <div>
+                  <Button onClick={onSendMessage} className={classes.sendBtn} variant="contained" type="button" color="secondary">Send</Button>
+                </div>
+              </Grid>
+            </Grid>
           </Grid>
         </Grid>
       </Grid>
@@ -209,7 +234,7 @@ function ChatRoom(props: Props) {
           <List>
             {users.map(user => {
               return (
-                <ListItem className="user-name">
+                <ListItem key={user.username} className="user-name">
                   <ListItemText primary={user.username} />
                 </ListItem>
               );
@@ -219,7 +244,7 @@ function ChatRoom(props: Props) {
       </Grid>
     </Grid>
   );
-  // }
+ }
 
   return <div className="loading">Adding you to the room, please wait..</div>;
 }

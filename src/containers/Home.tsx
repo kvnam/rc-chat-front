@@ -25,7 +25,7 @@ function Home(props: Props) {
     usernameError: false,
     usernameHelperText: 'Only characters and numbers allowed and length should be between 6 - 8.',
     room: 'Default',
-    userAdded: true,
+    userAdded: false,
     userService: getUserService()
   });
 
@@ -71,7 +71,7 @@ function Home(props: Props) {
        {fields.userAdded ? 
         <Grid item xs={12} md={12}>
           <ChatRoom user={{username: fields.username, room: fields.room}} /> 
-        </Grid>: 
+        </Grid> : 
         <Grid item xs={12} md={6}>
         <PickUserName
           room={fields.room}
