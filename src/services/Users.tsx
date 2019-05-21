@@ -31,8 +31,7 @@ class Users {
    *  @param user User object
    *  @returns Status string
    */
-  addUser = (user: UserType): boolean => {
-    console.log('In add user ', user.username);
+  addUser = (user: UserType): boolean => {    
     if(this.checkUsername(user.username)){
       const userVal = {
         username: user.username,
@@ -44,15 +43,13 @@ class Users {
        
        //Initiate the WebSocket connection for the user
        this.socketConnection = getWSService();
+       //Add a timeout to allow WebSocket connection to open
        const timeout = setTimeout(() => {
-         console.log('In timeout callback');
-         console.log(this.socketConnection);
-         if(this.socketConnection){
-          console.log('Sending message');
+         if(this.socketConnection){         
           //Add user details to Mongo DB
           getWSService().sendMessage("useradd", userVal);
         }
-       }, 3000);       
+       }, 2000);       
        return true;
     }else{
       return false;
@@ -85,7 +82,7 @@ class Users {
     const userIndex = this.userList.findIndex((userObj: UserType) => {
       return username === userObj.username;
     });
-    console.log(`User name index returned ${userIndex}`);
+    
     if(userIndex >= 0) return false;
 
     return true;

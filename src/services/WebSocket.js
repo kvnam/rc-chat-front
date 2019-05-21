@@ -4,14 +4,9 @@ const WS_URL = process.env.REACT_APP_WEBSOCKET_URL || "";
 
 let WSService = null;
 
-const MESSAGE_TYPE = {
-  ALL: 'all',
-  PM: 'pm'
-};
 class WebSocketService {
 
-  constructor() {
-    console.log(`WebSocket service contructor called`);
+  constructor() {    
     this.websocket = null;
     this.messageListeners = [];
     this.isOpen = false;
@@ -23,8 +18,7 @@ class WebSocketService {
    *  Set up WebSocket connection for a new user and
    *  basic listeners to handle events
    */
-  initSocket = () => {
-    console.log(`WebSocket service initSocket called`);
+  initSocket = () => {    
     this.websocket = new WebSocket(WS_URL);
     this.websocket.onopen = this.onConnOpen;
     this.websocket.onmessage = this.onMessage;
@@ -58,10 +52,7 @@ class WebSocketService {
    *    for
    *  }
    */
-  sendMessage = (routeKey, message) => {
-    console.log(`Sending message to route ${routeKey}`);
-    console.log(message);
-    console.log(this.websocket);
+  sendMessage = (routeKey, message) => {    
     if(this.websocket && this.isOpen){
       this.websocket.send(JSON.stringify({
         rcaction: routeKey,
@@ -79,8 +70,7 @@ class WebSocketService {
    *  @param type Message type ['all', 'pm']
    *  @param listener Function to handle message type
    */
-  addMessageListener = (room, type, listener) => {
-    console.log(`Adding listener for ${room} for ${type} msgs`);
+  addMessageListener = (room, type, listener) => {    
     if (!type || !room || typeof listener !== 'function') {
       return;
     }
@@ -97,13 +87,11 @@ class WebSocketService {
    * @param data Message body received from WebSocket 
    */
   onMessage = (data) => {
-    console.log('Response from API ');
-    console.log(data);
     if (data) {
-      const message = JSON.parse(data.data);
+      const message = JSON.parse(data.data);    
       const typeListener = this.messageListeners.find(listener => listener.type === message.type);
-      if (typeListener && typeof typeListener.listener === "function") {
-        console.log(`Calling listener for message `);
+
+      if (typeListener && typeof typeListener.listener === "function") {      
         typeListener.listener(message);
       } else {
         console.log('No handler found for message type');
@@ -111,15 +99,13 @@ class WebSocketService {
     }
   }
 
-  static initWSService() {
-    console.log(`WebSocket service initWSService called`);
-    if (!WSService) {
-      console.log(`WSService is null make a new one`);
+  static initWSService() {    
+    if (!WSService) {      
       WSService = new WebSocketService();
       WSService.initSocket();
       return WSService;
     }
-    console.log('WSService already exists return it');
+    
     return WSService;
   }
 

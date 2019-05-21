@@ -20,11 +20,13 @@ import "./chatroom.scss";
 interface User {
   username: string;
   room: string;
+  joined? : Date
+  last_active? : Date
 }
 
 interface Message {
   type: string;
-  msg: string;
+  msg: any;
   sent: Date | string;
   user: User;
 }
@@ -114,15 +116,34 @@ function ChatRoom(props: Props) {
     sent: ""
   });
 
-  const chatMessageHandler = (message: Message) => {
-    console.log('Add msg to list');
-    if (message.type === "all") {
-      console.log(message);
-      let updatedList = [...messageList];
-      updatedList.push(message);
-      updateMessageList(updatedList);
+  const addMessageToList = (message: Message) => {
+    let updatedList = [...messageList];    
+    updatedList.push(message);
+    updateMessageList(updatedList);
+  }
+
+  const chatMessageHandler = (message: Message) => {    
+    if (message.type === "all") {      
+      addMessageToList(message);
     }
   };
+
+  const userListMessageHandler = (message: Message) => {
+    if(message.type === "userlist"){      
+      const userList = message.msg;
+      const updatedUserList = userList.map((msgObj: User) => {
+        const { joined, username, room, last_active, } = msgObj;
+        return {
+          joined,
+          username,
+          room,
+          last_active,
+        };
+      });
+      
+      setUsers(updatedUserList);
+    }
+  }
 
   const onInputChange = (event: React.FormEvent<EventTarget>) => {
     let eventTarget = event.target as HTMLInputElement;
@@ -131,9 +152,9 @@ function ChatRoom(props: Props) {
     setCurrentMessage(updatedMsg);
   }
 
-  const onSendMessage = () => {
-    console.log('Send message clicked ');
+  const onSendMessage = () => {    
     let updatedMsg = { ...currentMessage };
+
     updatedMsg.type = "all";
     updatedMsg.sent = new Date();
     updatedMsg.user = {
@@ -142,17 +163,28 @@ function ChatRoom(props: Props) {
     };
     setCurrentMessage(updatedMsg);
     getWSService().sendMessage("test", updatedMsg);
+    //Add this message to chat
+    addMessageToList(updatedMsg);
+    //Reset chat box
+    updatedMsg = {
+      type: "",
+      msg: "",
+      user: {
+        username: "",
+        room: ""
+      },
+      sent: ""
+    };
+    setCurrentMessage(updatedMsg);
   }
 
-  useEffect(() => {
-    console.log(`In userService useEffect`);
-    if(!fields.userAdded && !users.find(usrVal => usrVal.username === props.user.username)){
-      console.log(`Adding user to service `);
+  useEffect(() => {    
+    if(!fields.userAdded && !users.find(usrVal => usrVal.username === props.user.username)){      
       const userAdd = fields.userService.addUser({
         username: props.user.username,
         room: props.user.room
       });
-      console.log(`User added ${userAdd}`);
+      
       setFields({...fields, userAdded: userAdd});
     }
   }, [fields.userService]);
@@ -172,8 +204,12 @@ function ChatRoom(props: Props) {
         "all",
         chatMessageHandler
       );
-      //Add user details to current message
-
+      //Add user list listener
+      getWSService().addMessageListener(
+        props.user.room,
+        "userlist",
+        userListMessageHandler
+      );
     }
   }, [fields.userAdded]);
 
@@ -234,9 +270,9 @@ function ChatRoom(props: Props) {
             Members
           </Typography>
           <List>
-            {users.map(user => {
+            {users.map((user, index) => {
               return (
-                <ListItem key={user.username} className="user-name">
+                <ListItem key={user.username + index} className="user-name">
                   <ListItemText primary={user.username} />
                 </ListItem>
               );
