@@ -10,8 +10,6 @@ class WebSocketService {
     this.websocket = null;
     this.messageListeners = [];
     this.isOpen = false;
-    this.userSent = false;
-    this.userMsg = null;
   }
 
   /**
